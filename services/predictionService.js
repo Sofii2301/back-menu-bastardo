@@ -1,4 +1,4 @@
-import { sheets, spreadsheetId } from "../config/google.js";
+import { sheets, spreadsheetId } from "./google.js";
 
 const PARTICIPANTES = "Participantes";
 const CODIGOS = "Codigos";
