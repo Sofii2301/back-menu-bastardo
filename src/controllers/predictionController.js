@@ -4,31 +4,75 @@ import {
     markCodeAsUsed
 } from "../services/predictionService.js";
 
+async function validateCode(code) {
+
+    const result = await findCode(code);
+
+    if (!result) {
+        return {
+            ok: false,
+            status: 404,
+            message: "Código inexistente."
+        };
+    }
+
+    if (result.used) {
+        return {
+            ok: false,
+            status: 400,
+            message: "Ese código ya fue utilizado."
+        };
+    }
+
+    return {
+        ok: true,
+        row: result.row
+    };
+
+}
+
+export async function validatePredictionCode(req, res) {
+
+    try {
+
+        const validation = await validateCode(req.body.code);
+
+        if (!validation.ok) {
+            return res.status(validation.status).json(validation);
+        }
+
+        return res.json({
+            ok: true
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno del servidor."
+        });
+
+    }
+
+}
+
 export async function createPrediction(req, res) {
 
     try {
 
         const data = req.body;
 
-        const code = await findCode(data.code);
+        const validation = await validateCode(data.code);
 
-        if (!code) {
-            return res.status(404).json({
-                ok: false,
-                message: "Código inexistente."
-            });
-        }
-
-        if (code.used) {
-            return res.status(400).json({
-                ok: false,
-                message: "Ese código ya fue utilizado."
-            });
+        if (!validation.ok) {
+            return res.status(validation.status).json(validation);
         }
 
         await savePrediction(data);
 
-        await markCodeAsUsed(code.row);
+        await markCodeAsUsed(validation.row);
 
         return res.json({
             ok: true,

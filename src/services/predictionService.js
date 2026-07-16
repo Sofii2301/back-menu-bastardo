@@ -68,12 +68,25 @@ export async function savePrediction(data) {
                 data.name,
                 data.contact,
                 data.instagram,
-                data.dni,
                 data.argentina,
-                data.rival
+                data.españa
             ]]
         }
 
     });
+
+}
+
+export async function validateCode(code) {
+
+    const response = await fetch(`${API}/prediction/validate`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ code })
+    });
+
+    return await response.json();
 
 }
