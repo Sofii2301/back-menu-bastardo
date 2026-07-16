@@ -32,7 +32,7 @@ async function validateCode(code) {
 }
 
 export async function validatePredictionCode(req, res) {
-
+    console.log("Entró al endpoint validate");
     try {
 
         const validation = await validateCode(req.body.code);
