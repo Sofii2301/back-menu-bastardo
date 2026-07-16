@@ -1,13 +1,49 @@
-import { getCodes } from "../services/predictionService.js";
+import {
+    findCode,
+    savePrediction,
+    markCodeAsUsed
+} from "../services/predictionService.js";
 
 export async function createPrediction(req, res) {
 
-    const codes = await getCodes();
+    try {
 
-    console.log(codes);
+        const data = req.body;
 
-    res.json({
-        ok: true
-    });
+        const code = await findCode(data.code);
+
+        if (!code) {
+            return res.status(404).json({
+                ok: false,
+                message: "Código inexistente."
+            });
+        }
+
+        if (code.used) {
+            return res.status(400).json({
+                ok: false,
+                message: "Ese código ya fue utilizado."
+            });
+        }
+
+        await savePrediction(data);
+
+        await markCodeAsUsed(code.row);
+
+        return res.json({
+            ok: true,
+            message: "¡Participación registrada!"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            ok: false,
+            message: "Error interno del servidor."
+        });
+
+    }
 
 }
